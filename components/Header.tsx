@@ -1,5 +1,6 @@
 import React from 'react';
 import Head from "next/head";
+import type { NextPage } from "next";
 
 const Header: NextPage = () => (
   <Head>

@@ -1,7 +1,3 @@
-.container {
-  padding: 0 2rem;
-}
-
 .main {
   min-height: 100vh;
   padding: 4rem 0;
@@ -94,9 +90,22 @@
   line-height: 1.5;
 }
 
+
+.center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 60vh;
+}
+
+
 @media (max-width: 600px) {
   .grid {
     width: 100%;
     flex-direction: column;
+  }
+
+  .header {
+    width: 514px;
   }
 }

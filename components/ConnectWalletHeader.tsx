@@ -1,13 +1,15 @@
 import React from 'react';
 import { AppBar, Typography } from '@mui/material';
+import Box from "@mui/material/Box";
 import Toolbar from '@mui/material/Toolbar';
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 
+import styles from '../styles/Home.module.css';
 import type { NextPage } from "next";
 
 
 const ConnectWalletHeader: NextPage = () => (
-  <div>
+  <Box className={styles.header}>
     <AppBar
       position="static"
       color="default"
@@ -28,7 +30,7 @@ const ConnectWalletHeader: NextPage = () => (
         </nav>
       </Toolbar>
     </AppBar >
-  </div>
+  </Box>
 );
 
 export default ConnectWalletHeader;

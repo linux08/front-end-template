@@ -3,8 +3,7 @@ import Container from "@mui/material/Container";
 import { useState } from "react";
 
 import Box from '@mui/material/Box';
-import Paper from "@mui/material/Paper/Paper";
-import TextField from "@mui/material/TextField/TextField";
+import TextField from "@mui/material/TextField";
 import { Typography } from '@mui/material';
 import type { NextPage } from "next";
 import Image from "next/image";
@@ -13,14 +12,14 @@ import Input from "@mui/material/Input";
 import Card from "@mui/material/Card";
 import Select from "@mui/material/Select";
 import Button from "@mui/material/Button";
+import Stack from '@mui/material/Stack';
+import CircularProgress from '@mui/material/CircularProgress';
 
 import TextareaAutosize from "@mui/base/TextareaAutosize";
-import { orange } from "@mui/material/colors";
-
 import ConnectWalletHeader from '../components/ConnectWalletHeader';
 import Header from '../components/Header';
-
 import abi from '../contracts/abi.json'
+import wagmi from 'wagmi';
 
 import {
   useContract,
@@ -35,12 +34,16 @@ import {
 
 import {
   fetchEnsName,
-  fetchEnsAvatar
+  fetchEnsAvatar,
+  GetContractResult
 } from '@wagmi/core'
 
 
-
-
+interface IMeow {
+  img: string;
+  author: string;
+  message: string;
+}
 
 
 
@@ -54,16 +57,17 @@ const Home: NextPage = () => {
   const { data: ensName } = useEnsName({ address })
 
 
-
   const signer = useSigner();
 
-  const [text, setText] = useState('');
-  const [visibility, setVisibility] = useState('public')
-  const [loading, setLoading] = useState(false)
-  const [meows, setMeows] = useState([]);
+  const [text, setText] = useState<string>('');
+  const [visibility, setVisibility] = useState<string>('public');
+  const [loading, setLoading] = useState<boolean>(true);
+  const [transactionLoading, setTransactionLoading] = useState<boolean>(false);
+  const [meows, setMeows] = useState<IMeow[]>([]);
+
 
   const { chain } = useNetwork();
-  const contract = useContract({ address: '0xd054e5724d7d595b72abbb0c460e0221cd859c8f', abi, signerOrProvider: signer?.data });
+  const contract: GetContractResult = useContract({ address: '0xd054e5724d7d595b72abbb0c460e0221cd859c8f', abi, signerOrProvider: signer?.data });
 
 
   useEffect(() => {
@@ -78,21 +82,26 @@ const Home: NextPage = () => {
             message: meow[0]
           }
         }));
+        setLoading(false);
+        //Temporary show the first element until i implement pagination
+
+        meows.length = 10;
         setMeows(meows.reverse());
       } catch (error) {
+        setLoading(false);
+        setMeows([]);
         console.log(error.message)
       };
     })();
   }, [contract]);
 
 
-  async function getENSImage(address): string {
+  async function getENSImage(address): Promise<string> {
 
     try {
       const ensImage = await fetchEnsAvatar({
         address,
       });
-
       return ensImage == null ? "https://picsum.photos/200" : ensImage;
     }
     catch (err) {
@@ -101,7 +110,7 @@ const Home: NextPage = () => {
 
   }
 
-  async function getENSName(address): string {
+  async function getENSName(address): Promise<string> {
     try {
       const ensName = await fetchEnsName({
         address,
@@ -114,168 +123,242 @@ const Home: NextPage = () => {
   }
 
 
-  const postInfo = async (data) => {
+  const postInfo = async () => {
     if (text.length < 1) {
-      alert('Text cant empty ')
+      alert('Text cant empty')
     }
     try {
+      setTransactionLoading(true);
       const transaction = await contract.sayMeow(text);
+      setTransactionLoading(false);
 
-      let data = {
+      let data: IMeow = {
         author: address,
         img: ensAvatar !== null ? ensAvatar : 'https://picsum.photos/200',
         message: text,
-      }
+      };
 
       let dataInfo = [data].concat(meows);
       setMeows(dataInfo);
     }
     catch (err) {
+      setTransactionLoading(false);
       console.log(err.message)
     }
   }
 
-  return (
+  const displayData = (data) => {
+    if (data.length === 0) {
+      return (
+        <Box className={styles.center} >
+          <Typography
+            variant="h4"
+            paddingLeft={0.1}
+            color="#dd6b20"
+          >
+            Data currently empty
+          </Typography>
+        </Box>)
+    }
+    return (
+      <Container>
+        {meows.map((item, id) => {
+          return (
+            <Card
+              key={id}
+              elevation={2}
+              sx={{
+                height: 100,
+                marginBottom: 2,
+                display: "flex",
+                padding: 3,
+                marginLeft: -3,
+                width: 500,
+              }}
+            >
+              <Box
+                sx={{
+                  display: "flex",
+                  justifyContent: "center",
+                  marginTop: 1,
+                  alignItems: "center",
+                }}
+              >
+                <Image
+                  src={`${item.img}`}
+                  alt="images"
+                  width="60"
+                  height="60"
+                  style={{
+                    borderRadius: 100,
+                    paddingLeft: 20,
+                  }}
+                />
+              </Box>
+              <Box style={{ paddingTop: 3, paddingLeft: 12 }}>
+                <Typography style={{ color: "#718096" }}>
+                  {" "}
+                  {item.author}{" "}
+                </Typography>
+                <Typography>{item.message}</Typography>
+              </Box>
+            </Card>
+          );
+        })}
+      </Container>
+    )
+  }
 
-    <div className={styles.container}>
+  const spinner = () => (
+    <Stack sx={{
+      color: 'grey.500',
+       justifyContent:
+        'center'
+    }} spacing={2} direction="row">
+      <CircularProgress color="secondary" />
+    </Stack>
+  );
 
-      <Header />
-
-      <ConnectWalletHeader />
-
-      <main className={styles.main}>
-
-
-        <Container
-          maxWidth="sm"
-          style={{
-            display: "flex",
-            justifyContent: "center",
-            flexDirection: "column",
+  const newMessage = () => (
+    <Card style={{ display: "flex", flexDirection: "column", width: 500 }}>
+      <TextareaAutosize
+        aria-label="empty textarea"
+        placeholder="You status message ..."
+        value={text}
+        onChange={(e) => setText(e.target.value)}
+        style={
+          {
+            width: 480,
+            outline: "none",
+            border: "none",
+            padding: 20,
+            color: "#718096",
+            marginTop: 10,
+          }
+        }
+      />
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "flex-end",
+          gap: 0.8,
+          width: 500,
+          paddingRight: 2,
+          paddingBottom: 2,
+          paddingTop: 5,
+        }}
+      >
+        <Select
+          name="Select"
+          id="select"
+          value={visibility}
+          onChange={(e) => setVisibility(e.target.value)}
+          sx={{
+            width: 120,
+            backgroundColor: "whitesmoke",
+            outline: "none",
+            height: 50,
+            color: "#4a5568",
+            border: "none",
           }}
         >
-          <Box style={{ display: "flex", flexDirection: "row" }}>
-            <Typography variant="subtitle1" fontWeight={780}>
-              Status:
-            </Typography>
-            <Typography variant="subtitle1" paddingLeft={0.5}>
-              ready
-            </Typography>
-          </Box>
+          <MenuItem value="Public" defaultChecked onSelect={() => setVisibility('public')}>
+            <Typography> 🌍 Public</Typography>
+          </MenuItem>
+          <MenuItem value="Private" onSelect={() => setVisibility('private')}>
+            <Typography> 🔒 Private</Typography>
+          </MenuItem>
+        </Select>
+        <Button
+          onClick={() => postInfo()}
+          sx={{ backgroundColor: "#dd6b20", color: "white", height: 50 }}
+        >
+          Post
+        </Button>
+      </Box>
+    </Card>
+  );
 
+
+  if (!address) {
+    return (
+      <Box>
+        <Header />
+        <ConnectWalletHeader />
+
+        <Box className={styles.center} >
           <Typography
             variant="h4"
             paddingLeft={0.1}
             color="#dd6b20"
             marginBottom={1}
           >
-            {" "}
-            Messages
+            Connect Metamask to use APP
           </Typography>
-          <Card style={{ display: "flex", flexDirection: "column", width: 500 }}>
-            <TextareaAutosize
-              aria-label="empty textarea"
-              placeholder="You status message ..."
-              value={text}
-              onChange={(e) => setText(e.target.value)}
+        </Box>
+      </Box>
+    )
+  }
+
+
+
+  return (
+
+    <Box>
+      <Header />
+      <ConnectWalletHeader />
+
+      <main className={styles.main}>
+        {
+          chain?.id === 5 ? (
+            <Container
+              maxWidth="sm"
               style={{
-                width: 480,
-                outline: "none",
-                border: "none",
-                padding: 20,
-                color: "#718096",
-                marginTop: 10,
-              }}
-            />
-            <Box
-              sx={{
                 display: "flex",
-                justifyContent: "flex-end",
-                gap: 0.8,
-                width: 500,
-                paddingRight: 2,
-                paddingBottom: 2,
-                paddingTop: 5,
+                justifyContent: "center",
+                flexDirection: "column",
               }}
             >
-              <Select
-                name="Select"
-                id="select"
-                value={visibility}
-                onChange={(e) => setVisibility(e.target.value)}
-                sx={{
-                  width: 120,
-                  backgroundColor: "whitesmoke",
-                  outline: "none",
-                  height: 50,
-                  color: "#4a5568",
-                  border: "none",
-                }}
+              <Box style={{ display: "flex", flexDirection: "row" }}>
+                <Typography variant="subtitle1" fontWeight={780}>
+                  Status:
+                </Typography>
+                <Typography variant="subtitle1" paddingLeft={0.5}>
+                  ready
+                </Typography>
+              </Box>
+
+              <Typography
+                variant="h4"
+                paddingLeft={0.1}
+                color="#dd6b20"
+                marginBottom={1}
               >
-                <MenuItem value="Public" defaultChecked onSelect={() => setVisibility('public')}>
-                  <Typography> 🌍 Public</Typography>
-                </MenuItem>
-                <MenuItem value="Private" onSelect={() => setVisibility('private')}>
-                  <Typography> 🔒 Private</Typography>
-                </MenuItem>
-              </Select>
-              <Button
-                onClick={() => postInfo()}
-                sx={{ backgroundColor: "#dd6b20", color: "white", height: 50 }}
-              >
-                Post
-              </Button>
-            </Box>
-          </Card>
-          <br />
-          <Container>
-            {meows.map((item, id) => {
-              return (
-                <Card
-                  key={id}
-                  elevation={2}
-                  sx={{
-                    height: 100,
-                    marginBottom: 2,
-                    display: "flex",
-                    padding: 3,
-                    marginLeft: -3,
-                    width: 500,
-                  }}
-                >
-                  <Box
-                    sx={{
-                      display: "flex",
-                      justifyContent: "center",
-                      marginTop: 1,
-                      alignItems: "center",
-                    }}
-                  >
-                    <Image
-                      src={`${item.img}`}
-                      alt="images"
-                      width="60"
-                      height="60"
-                      style={{
-                        borderRadius: 100,
-                        paddingLeft: 20,
-                      }}
-                    />
-                  </Box>
-                  <Box style={{ paddingTop: 3, paddingLeft: 12 }}>
-                    <Typography style={{ color: "#718096" }}>
-                      {" "}
-                      {item.author}{" "}
-                    </Typography>
-                    <Typography>{item.message}</Typography>
-                  </Box>
-                </Card>
-              );
-            })}
-          </Container>
-        </Container>
+                {" "}
+                Messages
+              </Typography>
+
+              {
+                transactionLoading ? spinner() :
+                  newMessage()
+              }
+
+              <br />
+
+              {
+                loading ? <Box> loading......</Box> : displayData(meows)
+              }
+
+            </Container>)
+            :
+            (<Box>
+              <Typography variant="subtitle1" fontWeight={780}>
+                Please switch to georli network to use DAPP
+              </Typography>
+            </Box>)
+        }
       </main>
-    </div>
+    </Box>
   );
 };
 

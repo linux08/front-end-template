@@ -12,10 +12,6 @@ import { theme } from "../config/mui-theme";
 
 const { chains, provider, webSocketProvider } = configureChains(
   [
-    mainnet,
-    polygon,
-    optimism,
-    arbitrum,
     goerli,
   ],
   [
