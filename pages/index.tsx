@@ -65,10 +65,7 @@ const Home: NextPage = () => {
   const [transactionLoading, setTransactionLoading] = useState<boolean>(false);
   const [meows, setMeows] = useState<IMeow[]>([]);
 
-
- 
   const contract: GetContractResult = useContract({ address: '0xd054e5724d7d595b72abbb0c460e0221cd859c8f', abi, signerOrProvider: signer?.data });
-
 
   useEffect(() => {
 
@@ -262,8 +259,6 @@ const Home: NextPage = () => {
     )
   }
 
-
-
   return (
 
     <Box>
@@ -319,7 +314,7 @@ const Home: NextPage = () => {
             </Box>)
         }
       </main>
-    </Box >
+    </Box>
   );
 };
 
