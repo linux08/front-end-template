@@ -98,6 +98,46 @@
   height: 60vh;
 }
 
+.mnCenter {
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+}
+
+.scrollContainer {
+  height: 60vh;
+  overflow-Y: auto;
+}
+
+.imgStyle {
+  border-radius: 100px;
+  padding-left: 20px;
+}
+
+.flexRow{
+  display: flex;
+  flex-direction: row;
+}
+
+.pt3pl12 {
+  padding-top: 3px;
+  padding-left: 12px;
+}
+
+.txtAreaCard{
+ display: flex;
+ flex-direction: column;
+ width: 500px;
+}
+
+.txtArea{
+   width: 480;
+   outline: none;
+   border: none;
+   padding: 20px;
+   color: #718096;
+   margin-top: 10px;
+}
 
 @media (max-width: 600px) {
   .grid {
@@ -106,6 +146,6 @@
   }
 
   .header {
-    width: 514px;
+    width: 500px;
   }
 }

@@ -1,7 +1,6 @@
 import { useEffect } from "react";
 import Container from "@mui/material/Container";
 import { useState } from "react";
-
 import Box from '@mui/material/Box';
 import TextField from "@mui/material/TextField";
 import { Typography } from '@mui/material';
@@ -14,13 +13,10 @@ import Select from "@mui/material/Select";
 import Button from "@mui/material/Button";
 import Stack from '@mui/material/Stack';
 import CircularProgress from '@mui/material/CircularProgress';
-
 import TextareaAutosize from "@mui/base/TextareaAutosize";
 import ConnectWalletHeader from '../components/ConnectWalletHeader';
 import Header from '../components/Header';
 import abi from '../contracts/abi.json'
-import wagmi from 'wagmi';
-
 import {
   useContract,
   useNetwork,
@@ -38,6 +34,17 @@ import {
   GetContractResult
 } from '@wagmi/core'
 
+import styles from '../styles/Home.module.css';
+
+import {
+  cardMeowStyle,
+  cardBoxMeowStyle,
+  spinnerStyle,
+  postButtonStyle,
+  messageBoxStyle,
+  messageBoxSelectStyle
+} from '../styles/Home.style.ts';
+
 
 interface IMeow {
   img: string;
@@ -45,9 +52,6 @@ interface IMeow {
   message: string;
 }
 
-
-
-import styles from '../styles/Home.module.css';
 
 const Home: NextPage = () => {
 
@@ -83,9 +87,6 @@ const Home: NextPage = () => {
           }
         }));
         setLoading(false);
-        //Temporary show the first element until i implement pagination
-
-        meows.length = 10;
         setMeows(meows.reverse());
       } catch (error) {
         setLoading(false);
@@ -140,6 +141,7 @@ const Home: NextPage = () => {
 
       let dataInfo = [data].concat(meows);
       setMeows(dataInfo);
+      setText('');
     }
     catch (err) {
       setTransactionLoading(false);
@@ -161,28 +163,18 @@ const Home: NextPage = () => {
         </Box>)
     }
     return (
-      <Container>
+      <Container
+        className={styles.scrollContainer}
+      >
         {meows.map((item, id) => {
           return (
             <Card
               key={id}
               elevation={2}
-              sx={{
-                height: 100,
-                marginBottom: 2,
-                display: "flex",
-                padding: 3,
-                marginLeft: -3,
-                width: 500,
-              }}
+              sx={cardMeowStyle}
             >
               <Box
-                sx={{
-                  display: "flex",
-                  justifyContent: "center",
-                  marginTop: 1,
-                  alignItems: "center",
-                }}
+                sx={cardBoxMeowStyle}
               >
                 <Image
                   src={`${item.img}`}
@@ -195,7 +187,7 @@ const Home: NextPage = () => {
                   }}
                 />
               </Box>
-              <Box style={{ paddingTop: 3, paddingLeft: 12 }}>
+              <Box className={styles.pt3pl12}>
                 <Typography style={{ color: "#718096" }}>
                   {" "}
                   {item.author}{" "}
@@ -210,57 +202,39 @@ const Home: NextPage = () => {
   }
 
   const spinner = () => (
-    <Stack sx={{
-      color: 'grey.500',
-       justifyContent:
-        'center'
-    }} spacing={2} direction="row">
+    <Stack sx={spinnerStyle} spacing={2} direction="row">
       <CircularProgress color="secondary" />
     </Stack>
   );
 
   const newMessage = () => (
-    <Card style={{ display: "flex", flexDirection: "column", width: 500 }}>
+    <Card className={styles.txtAreaCard}>
       <TextareaAutosize
         aria-label="empty textarea"
         placeholder="You status message ..."
         value={text}
         onChange={(e) => setText(e.target.value)}
-        style={
-          {
-            width: 480,
-            outline: "none",
-            border: "none",
-            padding: 20,
-            color: "#718096",
-            marginTop: 10,
-          }
-        }
+        className={styles.txtArea}
+        // style={
+        //   {
+        //     width: 480,
+        //     outline: "none",
+        //     border: "none",
+        //     padding: 20,
+        //     color: "#718096",
+        //     marginTop: 10,
+        //   }
+        // }
       />
       <Box
-        sx={{
-          display: "flex",
-          justifyContent: "flex-end",
-          gap: 0.8,
-          width: 500,
-          paddingRight: 2,
-          paddingBottom: 2,
-          paddingTop: 5,
-        }}
+        sx={messageBoxStyle}
       >
         <Select
           name="Select"
           id="select"
           value={visibility}
           onChange={(e) => setVisibility(e.target.value)}
-          sx={{
-            width: 120,
-            backgroundColor: "whitesmoke",
-            outline: "none",
-            height: 50,
-            color: "#4a5568",
-            border: "none",
-          }}
+          sx={messageBoxSelectStyle}
         >
           <MenuItem value="Public" defaultChecked onSelect={() => setVisibility('public')}>
             <Typography> 🌍 Public</Typography>
@@ -271,7 +245,7 @@ const Home: NextPage = () => {
         </Select>
         <Button
           onClick={() => postInfo()}
-          sx={{ backgroundColor: "#dd6b20", color: "white", height: 50 }}
+          sx={postButtonStyle}
         >
           Post
         </Button>
@@ -313,13 +287,9 @@ const Home: NextPage = () => {
           chain?.id === 5 ? (
             <Container
               maxWidth="sm"
-              style={{
-                display: "flex",
-                justifyContent: "center",
-                flexDirection: "column",
-              }}
+              className={styles.mnCenter}
             >
-              <Box style={{ display: "flex", flexDirection: "row" }}>
+              <Box className={styles.flexRow}>
                 <Typography variant="subtitle1" fontWeight={780}>
                   Status:
                 </Typography>
@@ -339,8 +309,7 @@ const Home: NextPage = () => {
               </Typography>
 
               {
-                transactionLoading ? spinner() :
-                  newMessage()
+                transactionLoading ? spinner() : newMessage()
               }
 
               <br />
