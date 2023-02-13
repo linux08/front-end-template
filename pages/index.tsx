@@ -119,7 +119,7 @@ const Home: NextPage = () => {
       return ensName == null ? address : ensName;
     }
     catch (err) {
-      return address
+      return address;
     }
   }
 
@@ -142,6 +142,7 @@ const Home: NextPage = () => {
       let dataInfo = [data].concat(meows);
       setMeows(dataInfo);
       setText('');
+      alert('New Meow Added!')
     }
     catch (err) {
       setTransactionLoading(false);
@@ -150,7 +151,7 @@ const Home: NextPage = () => {
   }
 
   const displayData = (data) => {
-    if (data.length === 0) {
+    if (loading && data.length === 0) {
       return (
         <Box className={styles.center} >
           <Typography
@@ -188,7 +189,8 @@ const Home: NextPage = () => {
                 />
               </Box>
               <Box className={styles.pt3pl12}>
-                <Typography style={{ color: "#718096" }}>
+                <Typography
+                  color="#718096">
                   {" "}
                   {item.author}{" "}
                 </Typography>
@@ -203,7 +205,7 @@ const Home: NextPage = () => {
 
   const spinner = () => (
     <Stack sx={spinnerStyle} spacing={2} direction="row">
-      <CircularProgress color="secondary" />
+      <CircularProgress color="warning" />
     </Stack>
   );
 
@@ -215,16 +217,6 @@ const Home: NextPage = () => {
         value={text}
         onChange={(e) => setText(e.target.value)}
         className={styles.txtArea}
-        // style={
-        //   {
-        //     width: 480,
-        //     outline: "none",
-        //     border: "none",
-        //     padding: 20,
-        //     color: "#718096",
-        //     marginTop: 10,
-        //   }
-        // }
       />
       <Box
         sx={messageBoxStyle}
@@ -315,7 +307,11 @@ const Home: NextPage = () => {
               <br />
 
               {
-                loading ? <Box> loading......</Box> : displayData(meows)
+                loading ? (
+                  <Box>
+                    {spinner()}
+                  </Box>
+                ) : displayData(meows)
               }
 
             </Container>)
@@ -327,7 +323,7 @@ const Home: NextPage = () => {
             </Box>)
         }
       </main>
-    </Box>
+    </Box >
   );
 };
 
