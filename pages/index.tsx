@@ -27,7 +27,6 @@ import {
   useAccount
 } from 'wagmi';
 
-
 import {
   fetchEnsName,
   fetchEnsAvatar,
@@ -35,7 +34,6 @@ import {
 } from '@wagmi/core'
 
 import styles from '../styles/Home.module.css';
-
 import {
   cardMeowStyle,
   cardBoxMeowStyle,
@@ -43,7 +41,7 @@ import {
   postButtonStyle,
   messageBoxStyle,
   messageBoxSelectStyle
-} from '../styles/Home.style.ts';
+} from '../styles/Home.style';
 
 
 interface IMeow {
@@ -55,12 +53,10 @@ interface IMeow {
 
 const Home: NextPage = () => {
 
-  const { address, connector, isConnected } = useAccount()
-
-  const { data: ensAvatar } = useEnsAvatar({ address })
-  const { data: ensName } = useEnsName({ address })
-
-
+  const { address, connector, isConnected } = useAccount();
+  const { data: ensAvatar } = useEnsAvatar({ address });
+  const { data: ensName } = useEnsName({ address });
+  const { chain } = useNetwork();
   const signer = useSigner();
 
   const [text, setText] = useState<string>('');
@@ -70,7 +66,7 @@ const Home: NextPage = () => {
   const [meows, setMeows] = useState<IMeow[]>([]);
 
 
-  const { chain } = useNetwork();
+ 
   const contract: GetContractResult = useContract({ address: '0xd054e5724d7d595b72abbb0c460e0221cd859c8f', abi, signerOrProvider: signer?.data });
 
 
