@@ -21,4 +21,5 @@ npm run lint
 TODO:
 - Implement Pagination logic
 
-[Preview](https://ng-frontend-application-abimbola130.vercel.app/).
+[Preview](https://front-end-template-abimbola130.vercel.app/).
+
