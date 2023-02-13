@@ -16,14 +16,9 @@ const { chains, provider, webSocketProvider } = configureChains(
     polygon,
     optimism,
     arbitrum,
-    ...(process.env.NEXT_PUBLIC_ENABLE_TESTNETS === "true" ? [goerli] : []),
+    goerli,
   ],
   [
-    // alchemyProvider({
-    // This is Alchemy's default API key.
-    // You can get your own at https://dashboard.alchemyapi.io
-    // apiKey: '_gg7wSSi0KMBsdKnGVfHDueq6xMB9EkC',
-    // }),
     publicProvider(),
   ]
 );
@@ -43,7 +38,7 @@ const wagmiClient = createClient({
 function MyApp({ Component, pageProps }: AppProps) {
   return (
     <WagmiConfig client={wagmiClient}>
-      <RainbowKitProvider chains={chains}>
+      <RainbowKitProvider chains={chains} initialChain={goerli}>
         <ThemeProvider theme={theme}>
           <CssBaseline />
           <Component {...pageProps} />
