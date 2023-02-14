@@ -79,8 +79,8 @@ const Home: NextPage = () => {
             message: meow[0]
           }
         }));
-        setLoading(false);
         setMeows(meows.reverse());
+        setLoading(false);
       } catch (error) {
         setLoading(false);
         setMeows([]);
